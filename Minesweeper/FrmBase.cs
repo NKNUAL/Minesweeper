@@ -20,13 +20,14 @@ namespace Minesweeper
 
         private void FrmBase_Load(object sender, EventArgs e)
         {
-            
+            LoadMinePanel(99, 16, 30);
         }
 
         MineRule _rule;
 
         private void LoadMinePanel(int mine_count, int height, int width)
         {
+            _flagCount = mine_count;
             _rule = new MineRule
             {
                 Height = height,
@@ -38,7 +39,7 @@ namespace Minesweeper
 
             flowPanel.Controls.Clear();
 
-            for (int i = 0; i < _rule.Height * _rule.Width - 1; i++)
+            for (int i = 0; i < _rule.Height * _rule.Width; i++)
             {
                 Button btn = new Button
                 {
@@ -47,7 +48,7 @@ namespace Minesweeper
                     Margin = new Padding(0, 0, 0, 0),
                     Padding = new Padding(0, 0, 0, 0),
                     Tag = i,
-                    BackColor = Color.Black,
+                    BackColor = Color.Gray,
                     Name = i.ToString(),
                     BackgroundImageLayout = ImageLayout.Zoom
                 };
@@ -64,7 +65,7 @@ namespace Minesweeper
             var btn = sender as Button;
             int i = (btn.Tag as int?) ?? 0;
 
-           
+
 
             MouseEventArgs m_e = (MouseEventArgs)e;
             if (m_e.Button == MouseButtons.Left)
@@ -90,7 +91,9 @@ namespace Minesweeper
                 if (!_ImgIndex.ContainsKey(i))
                 {
                     btn.BackgroundImage = Resources.旗子;
+                    btn.BackColor = Color.Green;
                     _ImgIndex.Add(i, 1);
+                    SetFlagCount(-1);
                 }
                 else
                 {
@@ -98,17 +101,19 @@ namespace Minesweeper
                     {
                         case 0:
                             btn.BackgroundImage = Resources.旗子;
-                            btn.BackColor = Color.White;
+                            btn.BackColor = Color.Green;
                             _ImgIndex[i] = 1;
+                            SetFlagCount(-1);
                             break;
                         case 1:
                             btn.BackgroundImage = Resources.问号;
-                            btn.BackColor = Color.White;
+                            btn.BackColor = Color.Green;
                             _ImgIndex[i] = 2;
+                            SetFlagCount(1);
                             break;
                         case 2:
                             btn.BackgroundImage = null;
-                            btn.BackColor = Color.Black;
+                            btn.BackColor = Color.Gray;
                             _ImgIndex[i] = 0;
                             break;
                     }
@@ -117,22 +122,43 @@ namespace Minesweeper
             }
         }
 
+        int _flagCount = 0;
+        private void SetFlagCount(int seed)
+        {
+            _flagCount += seed;
+            tbCount.Text = _flagCount.ToString();
+        }
 
         private void SetAroundSpaces(Dictionary<int, int> index_mine_count)
         {
             foreach (var item in index_mine_count)
             {
-                var btn = flowPanel.Controls.Find(item.Key.ToString(), false)[0];
+                var btn = flowPanel.Controls[item.Key];
                 if (item.Value > 0)
+                {
                     btn.Text = item.Value.ToString();
+                    btn.Font = new Font("宋体", btn.Font.Size, FontStyle.Bold); ;
+                }
                 btn.Enabled = false;
                 btn.BackColor = Color.White;
+                btn.BackgroundImage = null;
             }
         }
 
         private void btnStart_Click(object sender, EventArgs e)
         {
-            LoadMinePanel(99, 16, 30);
+
+        }
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(tbTime.Text))
+            {
+                tbTime.Text = "0";
+            }
+            else
+            {
+                tbTime.Text = (int.Parse(tbTime.Text) + 1).ToString();
+            }
         }
     }
 }
